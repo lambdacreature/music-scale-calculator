@@ -1,23 +1,45 @@
 import { useState, type ChangeEvent } from "react";
-import type { ScaleDegree } from "../musicPrimitives";
+import { matchFormula, matchNote, type HarmonicVector } from "../musicPrimitives";
 
 type ScaleFormProps = {
-  setRoot:  React.Dispatch<React.SetStateAction<string>>;
-  setScale: React.Dispatch<React.SetStateAction<ScaleDegree[]>>;
+  setRoot:  React.Dispatch<React.SetStateAction<HarmonicVector>>;
+  setFormula:React.Dispatch<React.SetStateAction<HarmonicVector[]>>;
+  setRenderResult: React.Dispatch<React.SetStateAction<boolean>>;
 };
 
-export const ScaleForm = ({ setRoot, setScale }: ScaleFormProps) => {
+export const ScaleForm = ({ setRoot, setFormula, setRenderResult }: ScaleFormProps) => {
   const [ inputRoot, setInputRoot ] = useState("");
   const [ inputFormula, setInputFormula ] = useState("");
   const [ validRoot, setValidRoot ] = useState(false);
   const [ validFormula, setValidFormula ] = useState(false);
 
+  console.log("root", validRoot)
+  console.log("formula", validFormula);
+
   const handleRootChange = (e: ChangeEvent<HTMLInputElement, HTMLInputElement>) => {
     setInputRoot(e.target.value);
+    try {
+      const root = matchNote(e.target.value);
+      setRoot(root);
+      setValidRoot(true);
+      setRenderResult(validFormula);
+    } catch {
+      setValidRoot(false);
+      setRenderResult(false);
+    }
   };
 
   const handleFormulaChange = (e: ChangeEvent<HTMLInputElement, HTMLInputElement>) => {
     setInputFormula(e.target.value);
+    try {
+      const formula = matchFormula(e.target.value);
+      setFormula(formula);
+      setValidFormula(true);
+      setRenderResult(validRoot);
+    } catch {
+      setValidFormula(false);
+      setRenderResult(false);
+    }
   };
 
   const handleSubmit = (e: React.SubmitEvent<HTMLFormElement>) => {
@@ -49,22 +71,6 @@ export const ScaleForm = ({ setRoot, setScale }: ScaleFormProps) => {
           className="self-stretch rounded-lg bg-zinc-800 px-4 py-2 outline-none focus-visible:ring-2 focus-visible:ring-violet-500"
         />
       </div>
-      <CalculateButton disabled={!validRoot || !validFormula} />
     </form>
-  );
-};
-
-type CalculateButtonProps = {
-  disabled: boolean;
-};
-
-const CalculateButton = ({ disabled }: CalculateButtonProps) => {
-  return (
-    <button
-      className="bg-violet-600 hover:bg-violet-500 transition-colors rounded-lg px-3 py-2 disabled:opacity-30 disabled:cursor-not-allowed"
-      disabled={disabled}
-    >
-      Calculate
-    </button>
   );
 };
